@@ -1,6 +1,5 @@
 "use client";
 
-import { Icons } from "@/components/icon";
 import OauthOption from "@/components/oauth-option";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,28 +8,35 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { registerSchema } from "@/lib/auth";
+import { loginSchema } from "@/lib/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const Page = () => {
-  const form = useForm<z.infer<typeof registerSchema>>({
-    resolver: zodResolver(registerSchema),
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  const toggleShowPasword = () => {
+    setShowPassword((prev) => !prev);
+  };
+
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
-      name: "",
       email: "",
       password: "",
-      confirmPasword: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof registerSchema>) {
+  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
     console.log(values);
-  }
+  };
 
   return (
     <div className="bg-slate-50 px-6 py-8 rounded-lg">
@@ -52,6 +58,8 @@ const Page = () => {
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
+
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -63,8 +71,26 @@ const Page = () => {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <div className="relative">
+                    <Input
+                      {...field}
+                      type={`${showPassword ? "text" : "password"}`}
+                      className="pr-10"
+                    />
+                    {!showPassword ? (
+                      <EyeIcon
+                        className="absolute right-3 top-2 size-5 cursor-pointer"
+                        onClick={toggleShowPasword}
+                      />
+                    ) : (
+                      <EyeOffIcon
+                        className="absolute right-3 top-2 size-5 cursor-pointer"
+                        onClick={toggleShowPasword}
+                      />
+                    )}
+                  </div>
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />

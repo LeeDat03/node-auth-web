@@ -67,3 +67,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* hide icon eye in password */
+input::-ms-reveal {
+  display: none;
+}

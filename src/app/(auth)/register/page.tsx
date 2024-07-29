@@ -8,28 +8,87 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { registerSchema } from "@/lib/auth";
+import { useToast } from "@/components/ui/use-toast";
+import { API_REQUEST } from "@/constants/fetch-request";
+import { RegisterResponse, registerSchema } from "@/lib/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const Page = () => {
+  const { toast } = useToast();
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  const toggleShowPasword = () => {
+    setShowPassword((prev) => !prev);
+  };
+
+  const { mutate: register, isPending } = useMutation({
+    mutationKey: ["register"],
+    mutationFn: async (values: z.infer<typeof registerSchema>) => {
+      try {
+        if (values.password !== values.confirmPassword) {
+          throw new Error("Passwords do not match");
+        }
+
+        const res = await fetch(`${API_REQUEST}/register`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        });
+
+        const data: RegisterResponse = await res.json();
+
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+        return data;
+      } catch (err) {
+        throw err;
+      }
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Success",
+        description: "Account created successfully",
+        variant: "success",
+      });
+      router.push("/login");
+    },
+    onError: (error) => {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: error.message ?? "An error occurred",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onSubmit = (values: z.infer<typeof registerSchema>) => {
+    register(values);
+  };
+
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
       email: "",
       password: "",
-      confirmPasword: "",
+      confirmPassword: "",
     },
   });
-
-  function onSubmit(values: z.infer<typeof registerSchema>) {
-    console.log(values);
-  }
 
   return (
     <div className="bg-slate-50 px-6 py-8 rounded-lg">
@@ -51,6 +110,7 @@ const Page = () => {
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -64,6 +124,7 @@ const Page = () => {
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -75,26 +136,64 @@ const Page = () => {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <div className="relative">
+                    <Input
+                      {...field}
+                      type={`${showPassword ? "text" : "password"}`}
+                      className="pr-10"
+                    />
+                    {!showPassword ? (
+                      <EyeIcon
+                        className="absolute right-3 top-2 size-5 cursor-pointer"
+                        onClick={toggleShowPasword}
+                      />
+                    ) : (
+                      <EyeOffIcon
+                        className="absolute right-3 top-2 size-5 cursor-pointer"
+                        onClick={toggleShowPasword}
+                      />
+                    )}
+                  </div>
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
 
           <FormField
             control={form.control}
-            name="confirmPasword"
+            name="confirmPassword"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Confirm password</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <div className="relative">
+                    <Input
+                      {...field}
+                      type={`${showPassword ? "text" : "password"}`}
+                      className="pr-10"
+                    />
+                    {!showPassword ? (
+                      <EyeIcon
+                        className="absolute right-3 top-2 size-5 cursor-pointer"
+                        onClick={toggleShowPasword}
+                      />
+                    ) : (
+                      <EyeOffIcon
+                        className="absolute right-3 top-2 size-5 cursor-pointer"
+                        onClick={toggleShowPasword}
+                      />
+                    )}
+                  </div>
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
 
-          <Button className="w-full">Create account</Button>
+          <Button className="w-full" type="submit">
+            Create account
+          </Button>
         </form>
       </Form>
 
