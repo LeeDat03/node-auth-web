@@ -11,16 +11,22 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { loginSchema } from "@/lib/auth";
+import { useToast } from "@/components/ui/use-toast";
+import { API_REQUEST } from "@/constants/fetch-request";
+import { loginSchema, RegisterResponse } from "@/lib/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const Page = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const { toast } = useToast();
+  const router = useRouter();
 
   const toggleShowPasword = () => {
     setShowPassword((prev) => !prev);
@@ -34,8 +40,49 @@ const Page = () => {
     },
   });
 
+  const { mutate: login, isPending } = useMutation({
+    mutationKey: ["login"],
+    mutationFn: async (values: z.infer<typeof loginSchema>) => {
+      try {
+        const res = await fetch(`${API_REQUEST}/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+          credentials: "include",
+        });
+        const data: RegisterResponse = await res.json();
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+        return data;
+      } catch (error) {
+        throw error;
+      }
+    },
+    onSuccess: (data) => {
+      console.log(data);
+
+      toast({
+        title: "Success",
+        description: "Login successfully",
+        variant: "success",
+      });
+      router.push("/");
+    },
+    onError: (error) => {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: error.message ?? "An error occurred",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
-    console.log(values);
+    login(values);
   };
 
   return (

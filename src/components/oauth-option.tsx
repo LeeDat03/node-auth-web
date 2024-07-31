@@ -3,8 +3,11 @@ import { Button } from "./ui/button";
 import { Icons } from "./icon";
 import Link from "next/link";
 import { API_REQUEST } from "@/constants/fetch-request";
+import { useRouter } from "next/navigation";
 
 const OauthOption = () => {
+  const router = useRouter();
+
   return (
     <div className="my-5">
       <div className="flex items-center justify-center">

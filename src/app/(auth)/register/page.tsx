@@ -46,6 +46,7 @@ const Page = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(values),
+          credentials: "include",
         });
 
         const data: RegisterResponse = await res.json();
@@ -59,12 +60,13 @@ const Page = () => {
       }
     },
     onSuccess: (data) => {
+      console.log(data);
       toast({
         title: "Success",
         description: "Account created successfully",
         variant: "success",
       });
-      router.push("/login");
+      router.push("/");
     },
     onError: (error) => {
       console.error(error);

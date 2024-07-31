@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+export interface User {
+  name: string;
+  email: string;
+  emailVerified: boolean | null;
+  image: string | null;
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
 export const registerSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   email: z.string().email({ message: "Please provide a valid email" }),
@@ -14,16 +25,7 @@ export interface RegisterResponse {
   token: string;
   message?: string;
   data?: {
-    user: {
-      name: string;
-      email: string;
-      emailVerified: boolean | null;
-      image: string | null;
-      _id: string;
-      createdAt: string;
-      updatedAt: string;
-      __v: number;
-    };
+    user: User;
   };
 }
 

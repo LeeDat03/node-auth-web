@@ -1,14 +1,31 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { API_REQUEST } from "@/constants/fetch-request";
 
 const Page = () => {
-  const router = useRouter();
+  const { data, isLoading } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      // const token = ;
 
-  router.push("/login");
+      const res = await fetch(`${API_REQUEST}/auth/me`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer }`,
+        },
+        credentials: "include",
+      });
+      const data = await res.json();
 
-  return <div>Hello</div>;
+      console.log(data);
+      return data;
+    },
+  });
+
+  return <div>hello</div>;
 };
 
 export default Page;
